@@ -18,8 +18,10 @@ function showUploadedImage(e) {
 }
 
 function cutImageIntoTiles() {
-    var canvas = document.getElementById("imageTiles");
+    var canvas = document.createElement('canvas');
     var ctx = canvas.getContext("2d");
+    
+    
     
     var uploaded_image = document.getElementById("myImage");
     var image_width = uploaded_image.width;
@@ -27,7 +29,10 @@ function cutImageIntoTiles() {
     canvas.width = image_width;
     canvas.height = image_height;
     
-    var num = 2;
+    ctx.drawImage(uploaded_image, 0, 0, image_width, image_height);
+
+
+    var num = 100;
     var tile_width = image_width/num;
     var tile_height = image_height/num;
     
@@ -37,29 +42,57 @@ function cutImageIntoTiles() {
     
     for(var i = 0; i <num; i++){
         for(var j = 0; j <num; j++){
-            var p = {row: i, col: j};
+            var p = {col: i, row: j};
             pieces.push(p);
         }
     }
     
+    var tileData = [];
+    
 
     
     for(var index=0; index<pieces.length; index++){
+        
         var p = pieces[index];
         var row = p.row;
         var col = p.col;
         
-        var sx = row*tile_width;
-        var sy = col*tile_height;
+        let colorSum = { r:0, g:0, b:0 }
+        var count = tile_width * tile_height;
+        for (var i = row*tile_width; i < (row+1)*tile_width; i++){
+            for(var j=col*tile_height; j < (col+1)*tile_height; j++) {
+                let pixelData = canvas.getContext('2d').getImageData(i, j, 1, 1).data;
+                colorSum.r += pixelData[0];
+                colorSum.g += pixelData[1];
+                colorSum.b += pixelData[2];
+                //colorSum.a += pixelData[3];
+            } 
+        }
         
-        ctx.drawImage(uploaded_image, sx, sy, tile_width, tile_height, sx, sy, tile_width, tile_height);
-
+        let averageColor = {};
+        averageColor.r = Math.round(colorSum.r/count);
+        averageColor.g = Math.round(colorSum.g/count);
+        averageColor.b = Math.round(colorSum.b/count);
+        //averageColor.a = colorSum.a/count;
         
-
+        var averageColorHex = rgbToHex(averageColor.r, averageColor.g, averageColor.b);
+        
+        p.averageColorHex = averageColorHex;
+        
+        
     }
     //  ctx.drawImage(uploaded_image, 0, 0, 150, 150, 20, 20, 0, 0);
     
     
     
     
+}
+
+function componentToHex(c) {
+    var hex = c.toString(16);
+    return hex.length == 1 ? "0" + hex : hex;
+}
+
+function rgbToHex(r, g, b) {
+    return componentToHex(r) + componentToHex(g) + componentToHex(b);
 }
