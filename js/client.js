@@ -3,7 +3,20 @@ window.onload = function () {
     
     var input_field = document.querySelector("input[type='file']");
     input_field.addEventListener("change", function () {
-        console.log("changed");
+        if(document.getElementById("uploadedImage")){
+            document.getElementById("uploadedImage").remove();
+            
+        }
+        
+        var tiles_length = document.getElementsByClassName("tiles");
+        
+        if(tiles_length){
+            for(var i=0; i<tiles_length; i++){
+                document.getElementsByClassName("tiles")[i].remove();
+            }
+        }
+        
+              
         var reader = new FileReader();
         reader.onload = function () {
             var img = new Image();
@@ -102,6 +115,7 @@ function processRequest(e) {
             p.processed = true;
             
             var tiles_div = document.createElement("div");
+            tiles_div.className = "tiles"; 
             document.getElementsByTagName("body")[0].appendChild(tiles_div);
             var svg = p.xhttp.responseText;
             tiles_div.innerHTML = svg;
