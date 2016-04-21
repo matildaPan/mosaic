@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <meta charset="UTF-8">
     <script type="text/javascript" src="js/mosaic.js"></script>
     <script type="text/javascript" src="js/client.js"></script>
     <title>Mosaic</title>
@@ -9,11 +10,12 @@
     <!-- Edit me. -->
     
         <input type="file"/>
+        <input type="number" id="rowColNumber" min="2" max="70">
 
         <!--<img id="myImage" src="#" alt="uploaded image"/>
         <br>-->
         
-        <button onclick="StartGeneration()">Generate Mosaic</button>
+        <button onclick="StartGeneration()" id="generateButton">Generate Mosaic</button>
 <!--        
         <br>
         <div>

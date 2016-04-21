@@ -2,27 +2,33 @@
 var imageLoaded = {};
 var loadedRow = [];
 var pieces = [];
+var num = 0;
 
 onmessage = function(e) {
     console.log('Message received from main script');
-     MosaicGenerator(e.data.totalPixelData, e.data.width, e.data.height);
+     MosaicGenerator(e.data.totalPixelData, e.data.width, e.data.height, e.data.num);
 }
 
-function MosaicGenerator(totalPixelData, width, height) {
+function MosaicGenerator(totalPixelData, width, height, inputNum) {
  
     //var uploaded_image = document.getElementById("uploadedImage");
     var image_width = width;
     var image_height = height;
 
 
-    var num = 50;
-    var tile_width = image_width/num;
-    var tile_height = image_height/num;
+    if(isNaN(inputNum)){
+        num = 5;
+    }else{
+        num = inputNum;        
+    }
+    
+    var tile_width = Math.round(image_width/num);
+    var tile_height = Math.round(image_height/num);
     
 
     for(var i = 0; i <num; i++){
         for(var j = 0; j <num; j++){
-            var p = {col: i, row: j};
+            var p = {col: j, row: i};
             pieces.push(p);
         }
     }
@@ -75,19 +81,37 @@ function MosaicGenerator(totalPixelData, width, height) {
        // postMessage("Tile "+p.row+","+p.col+" processed.")
         makeRequest("/color/" + averageColorHex).then(function(svg){
             imageLoaded[p.row].Count += 1; 
-            imageLoaded[p.row].Images[p.col] += svg; 
-            if (imageLoaded[p.row].Count == num && imageLoaded[p.row].showed == false){
-                let rowImgaes = imageLoaded[p.row].Images.join('');
-                postMessage(rowImgaes);
-                imageLoaded[p.row].showed == true;
-            }
+            imageLoaded[p.row].Images[p.col] = svg; 
+            // if (imageLoaded[p.row].Count == num && imageLoaded[p.row].showed == false){
+            //     let rowImgaes = imageLoaded[p.row].Images.join('');
+            //     postMessage(rowImgaes);
+            //     imageLoaded[p.row].showed == true;
+            // }
+
             
         },function(error){
             console.log(error.status + ": "+error.statusText);
         })
      
     }
+    
+    setTimeout(function() {
+        for(let row=0; row < num; row++){
+              sendSvgRow(imageLoaded[row]);             
+        }
+    }, 2000);
       
+}
+
+
+function sendSvgRow(rowImageLoaded) {
+    if (rowImageLoaded.Count == num && rowImageLoaded.showed == false){
+        let rowImgaes = rowImageLoaded.Images.join('');
+        postMessage(rowImgaes);
+        rowImageLoaded.showed == true;
+    }else{
+        setTimeout(sendSvgRow, 1000);
+    }
 }
 
 function makeRequest(url) {
